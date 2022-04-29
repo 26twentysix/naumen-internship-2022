@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 
@@ -9,9 +7,12 @@ public class Main {
     record Pair(Long left, Integer right) {
     }
 
-    public static void main(String[] args) throws IOException {
-        final String filePath = "src/main/resources/input.txt";
-        BufferedReader reader = new BufferedReader(new FileReader(filePath));
+    /*
+    Solution for O(n*log(n))
+    Из кэша удаляем элемент который встретится максимально поздно относительно остальных элементов
+     */
+    public static int findServerRequests(final String inputFilePath) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(inputFilePath));
         String currentLine = reader.readLine();
         String[] nums = currentLine.split(" ");
         int cacheSize = Integer.parseInt(nums[0]);
@@ -29,13 +30,9 @@ public class Main {
                 requestsFrequency.get(currentLong).add(i);
             }
         }
+        reader.close();
         int count = 0;
-        SortedSet<Pair> cache = new TreeSet<>(new Comparator<Pair>() {
-            @Override
-            public int compare(Pair o1, Pair o2) {
-                return o1.right.compareTo(o2.right);
-            }
-        });
+        SortedSet<Pair> cache = new TreeSet<>(Comparator.comparing(o -> o.right));
         for (int i = 0; i < Integer.parseInt(nums[1]); i++) {
             Long currentRequest = requestsQueue.poll();
             var currentRequestNextPositions = requestsFrequency.get(currentRequest);
@@ -51,15 +48,26 @@ public class Main {
                 continue;
             }
             count++;
-            if (cache.size() < cacheSize) {
-                currentPair = new Pair(currentRequest, currentRequestNextPositions.first());
-                cache.add(currentPair);
-            } else {
+            if (cache.size() >= cacheSize) {
                 cache.remove(cache.last());
-                currentPair = new Pair(currentRequest, currentRequestNextPositions.first());
-                cache.add(currentPair);
             }
+            currentPair = new Pair(currentRequest, currentRequestNextPositions.first());
+            cache.add(currentPair);
         }
-        System.out.println(count);
+        return count;
+    }
+
+    public static void main(String[] args) {
+        final String inputFilePath = "src/main/resources/input.txt";
+        final String outputFilePath = "src/main/resources/output.txt";
+        int count;
+        try {
+            count = findServerRequests(inputFilePath);
+            BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath));
+            writer.write(count);
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
