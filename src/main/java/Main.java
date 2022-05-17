@@ -58,13 +58,13 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        final String inputFilePath = "src/main/resources/input.txt";
+        final String inputFilePath = "src/main/resources/input0.txt";
         final String outputFilePath = "src/main/resources/output.txt";
         int count;
         try {
             count = findServerRequests(inputFilePath);
             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFilePath));
-            writer.write(count);
+            writer.write(Integer.toString(count));
             writer.close();
         } catch (IOException e) {
             e.printStackTrace();
